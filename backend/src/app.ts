@@ -4,7 +4,6 @@ import mahasiswaRoutes from "./routes/mahasiswa.route";
 import mahasiswaDbRoutes from "./routes/mahasiswa-db.route";
 
 
-
 const app = express();
 
 app.use(cors());
@@ -17,4 +16,7 @@ app.get("/", (req, res) => {
 app.use("/api/mahasiswa", mahasiswaRoutes);
 app.use("/api/db/mahasiswa", mahasiswaDbRoutes);
 
+
 export default app;
+
+
