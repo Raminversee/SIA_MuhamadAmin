@@ -97,4 +97,66 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+
+// =======================
+// UPDATE Mahasiswa
+// =======================
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { nim, nama, prodi, angkatan } = req.body;
+
+    const [result]: any = await db.execute(
+      `UPDATE mahasiswa
+       SET nim = ?, nama = ?, prodi = ?, angkatan = ?
+       WHERE id = ?`,
+      [nim, nama, prodi, angkatan, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Mahasiswa tidak ditemukan",
+      });
+    }
+
+    res.json({
+      message: "Mahasiswa berhasil diperbarui",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Terjadi kesalahan server",
+    });
+  }
+});
+
+// =======================
+// DELETE Mahasiswa
+// =======================
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const [result]: any = await db.execute(
+      "DELETE FROM mahasiswa WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Mahasiswa tidak ditemukan",
+      });
+    }
+
+    res.json({
+      message: "Mahasiswa berhasil dihapus",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Terjadi kesalahan server",
+    });
+  }
+});
+
 export default router;
