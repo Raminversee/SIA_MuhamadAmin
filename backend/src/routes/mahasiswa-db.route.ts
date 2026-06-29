@@ -3,6 +3,30 @@ import db from "../config/database";
 
 const router = Router();
 
+// =======================
+// GET Semua Mahasiswa
+// =======================
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT * FROM mahasiswa"
+    );
+
+    res.json({
+      message: "Data mahasiswa berhasil diambil",
+      data: rows,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Terjadi kesalahan server",
+    });
+  }
+});
+
+// =======================
+// GET Mahasiswa Berdasarkan ID
+// =======================
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -30,6 +54,9 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
+// =======================
+// POST Tambah Mahasiswa
+// =======================
 router.post("/", async (req: Request, res: Response) => {
   try {
     const { nim, nama, prodi, angkatan } = req.body;
@@ -69,6 +96,5 @@ router.post("/", async (req: Request, res: Response) => {
     });
   }
 });
-
 
 export default router;
