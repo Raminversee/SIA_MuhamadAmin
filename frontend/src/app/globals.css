@@ -54,12 +54,31 @@ label {
   font-weight: 600;
 }
 
-input {
+.form-group input,
+.form-group select {
+  width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
+  background: white;
 }
+.card .grid > input,
+.card .grid > select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: white;
+}
+
+/* input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+} */
 
 button {
   border: none;

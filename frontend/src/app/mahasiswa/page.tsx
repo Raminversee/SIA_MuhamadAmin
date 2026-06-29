@@ -8,8 +8,8 @@ import {
   createMahasiswa,
   deleteMahasiswa,
   getMahasiswa,
+  getProdi,
   Mahasiswa,
-  MahasiswaInput,
   updateMahasiswa,
 } from "@/lib/api";
 
@@ -17,15 +17,26 @@ export default function MahasiswaPage() {
   const [mahasiswa, setMahasiswa] = useState<Mahasiswa[]>([]);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState<Mahasiswa | null>(null);
   const [loading, setLoading] = useState(true);
+  const [prodi, setProdi] = useState<any[]>([]); // State untuk menyimpan data prodi
+  const [search, setSearch] = useState(""); // State untuk menyimpan nilai pencarian
+  const [prodiId, setProdiId] = useState(""); // State untuk menyimpan nilai filter prodi
+  const [page, setPage] = useState(1);  // State untuk menyimpan halaman saat ini
+  const [limit] = useState(10); // State untuk menyimpan jumlah data per halaman
+  const [totalPage, setTotalPage] = useState(1); // State untuk menyimpan total halaman
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
   const loadMahasiswa = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await getMahasiswa();
-      setMahasiswa(data);
+      const result = await getMahasiswa({
+        search,
+        prodi_id: prodiId,
+        page,
+        limit,
+      });
+      setMahasiswa(result.data);
+      setTotalPage(result.meta.totalPage);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mengambil data mahasiswa");
     } finally {
@@ -33,20 +44,33 @@ export default function MahasiswaPage() {
     }
   };
 
+  const loadProdi = async () => {
+    try {
+      const data = await getProdi();
+      setProdi(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     loadMahasiswa();
+  }, [page]);
+
+  useEffect(() => {
+    loadProdi();
   }, []);
 
-  const handleSubmit = async (payload: MahasiswaInput) => {
+  const handleSubmit = async (formData: FormData) => {
     try {
       setMessage("");
       setError("");
 
       if (selectedMahasiswa) {
-        await updateMahasiswa(selectedMahasiswa.id, payload);
+        await updateMahasiswa(selectedMahasiswa.id, formData);
         setMessage("Data mahasiswa berhasil diperbarui");
       } else {
-        await createMahasiswa(payload);
+        await createMahasiswa(formData);
         setMessage("Data mahasiswa berhasil ditambahkan");
       }
 
@@ -72,6 +96,11 @@ export default function MahasiswaPage() {
     }
   };
 
+  const handleSearch = () => {
+    setPage(1);
+    loadMahasiswa();
+  };
+  
   return (
     <main className="container">
       <div className="header">
@@ -90,9 +119,43 @@ export default function MahasiswaPage() {
 
       <MahasiswaForm
         selectedMahasiswa={selectedMahasiswa}
+        prodi={prodi}
         onSubmit={handleSubmit}
         onCancelEdit={() => setSelectedMahasiswa(null)}
       />
+
+      <div className="card" style={{ marginTop: 20 }}>
+        <div className="grid">
+
+          <input
+            type="text"
+            placeholder="Cari NIM atau Nama"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <select
+            value={prodiId}
+            onChange={(e) => setProdiId(e.target.value)}
+          >
+            <option value="">Semua Prodi</option>
+
+            {prodi.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.nama_prodi}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="btn-primary"
+            onClick={handleSearch}
+          >
+            Cari
+          </button>
+
+        </div>
+      </div>
 
       <section className="card" style={{ marginTop: 20 }}>
         <h2>Daftar Mahasiswa</h2>
@@ -105,6 +168,33 @@ export default function MahasiswaPage() {
             onDelete={handleDelete}
           />
         )}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: 20,
+          }}
+        >
+          <button
+            className="btn-secondary"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </button>
+
+          <span>
+            Halaman {page} dari {totalPage}
+          </span>
+
+          <button
+            className="btn-secondary"
+            disabled={page >= totalPage}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </button>
+        </div>
       </section>
     </main>
   );
